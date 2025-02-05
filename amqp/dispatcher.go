@@ -64,7 +64,7 @@ type Config struct {
 }
 
 type DispatcherPluginMessage struct {
-	Data       any       `json:"data"`
-	AnalysisId uuid.UUID `json:"analysis_id"`
-	ProjectId  uuid.UUID `json:"project_id"`
+	Data           any       `json:"data"`
+	AnalysisId     uuid.UUID `json:"analysis_id"`
+	OrganizationId uuid.UUID `json:"organization_id"`
 }
