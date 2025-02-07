@@ -6,15 +6,16 @@ import (
 )
 
 type Analysis struct {
-	bun.BaseModel `bun:"table:analysis,alias:analysis"`
-	Id            uuid.UUID `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
-	AnalyzerId    uuid.UUID `bun:"analyzerId"`
-	Config        map[string]any
-	Stage         int
-	Steps         [][]Step
-	Status        AnalysisStatus
-	Commit        string `bun:"commit_hash"`
-	Branch        string
+	bun.BaseModel  `bun:"table:analysis,alias:analysis"`
+	Id             uuid.UUID `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
+	AnalyzerId     uuid.UUID `bun:"analyzerId"`
+	OrganizationId uuid.UUID `bun:"organizationId"`
+	Config         map[string]any
+	Stage          int
+	Steps          [][]Step
+	Status         AnalysisStatus
+	Commit         string `bun:"commit_hash"`
+	Branch         string
 	// Results       []*result.Result `bun:"rel:has-many,join:id=analysisId"`
 }
 
