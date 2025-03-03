@@ -10,6 +10,7 @@ type Analysis struct {
 	Id             uuid.UUID `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
 	AnalyzerId     uuid.UUID `bun:"analyzerId"`
 	OrganizationId uuid.UUID `bun:"organizationId"`
+	ProjectId      uuid.UUID `bun:"projectId"`
 	Config         map[string]any
 	Stage          int
 	Steps          [][]Step
