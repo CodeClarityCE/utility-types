@@ -32,7 +32,7 @@ type Severity struct {
 }
 
 type Affected struct {
-	Package           Package        `json:"package"`
+	Package           OSVPackage     `json:"package"`
 	Severity          []Severity     `json:"severity"`
 	Ranges            []Range        `json:"ranges"`
 	Versions          []string       `json:"versions"`
