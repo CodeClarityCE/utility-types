@@ -7,10 +7,10 @@ import (
 
 type Analysis struct {
 	bun.BaseModel  `bun:"table:analysis,alias:analysis"`
-	Id             uuid.UUID `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
-	AnalyzerId     uuid.UUID `bun:"analyzerId"`
-	OrganizationId uuid.UUID `bun:"organizationId"`
-	ProjectId      uuid.UUID `bun:"projectId"`
+	Id             uuid.UUID  `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
+	AnalyzerId     uuid.UUID  `bun:"analyzerId"`
+	OrganizationId uuid.UUID  `bun:"organizationId"`
+	ProjectId      *uuid.UUID `bun:"projectId"` // Pointer allows null values
 	Config         map[string]any
 	Stage          int
 	Steps          [][]Step
