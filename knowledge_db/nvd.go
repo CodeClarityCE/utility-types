@@ -20,6 +20,8 @@ type NVDItem struct {
 	LastModified      string          `bun:"lastModified"`
 	VulnStatus        string          `bun:"vulnStatus"`
 	Descriptions      []Descriptions  `bun:"descriptions"`
+	Vlai_score        string          `bun:"vlai_score"`
+	Vlai_confidence   float64         `bun:"vlai_confidence"`
 	Metrics           Metrics         `bun:"metrics"`
 	Weaknesses        []Weaknesses    `bun:"weaknesses"`
 	Configurations    []Configuration `bun:"configurations"`
