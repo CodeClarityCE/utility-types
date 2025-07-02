@@ -10,6 +10,8 @@ type OSVItem struct {
 	Id               uuid.UUID      `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
 	OSVId            string         `json:"id" bun:"osv_id"`
 	Schema_version   string         `json:"schema_version" bun:"schema_version"`
+	Vlai_score       string         `bun:"vlai_score"`
+	Vlai_confidence  float64        `bun:"vlai_confidence"`
 	Modified         string         `json:"modified" bun:"modified"`
 	Published        string         `json:"published" bun:"published"`
 	Withdrawn        string         `json:"withdrawn" bun:"withdrawn"`
