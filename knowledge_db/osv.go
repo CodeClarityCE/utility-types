@@ -1,6 +1,9 @@
 package knowledge
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
@@ -70,5 +73,23 @@ type Reference struct {
 type Credit struct {
 	Name    string   `json:"name"`
 	Contact []string `json:"contact"`
-	Type    []string `json:"type"`
+	Type    string   `json:"type"`
+}
+
+// Custom unmarshaler for Credit to handle both single string and slice of strings
+func (c *Credit) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		Name    string   `json:"name"`
+		Contact []string `json:"contact"`
+		Type    string   `json:"type"`
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return fmt.Errorf("invalid format for Credit: %s", string(data))
+	}
+
+	c.Name = raw.Name
+	c.Contact = raw.Contact
+	c.Type = raw.Type
+	return nil
 }
