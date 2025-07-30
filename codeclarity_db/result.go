@@ -1,6 +1,7 @@
 package codeclarity
 
 import (
+	"time"
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
@@ -11,4 +12,5 @@ type Result struct {
 	Result        interface{} `bun:"result"`
 	AnalysisId    uuid.UUID   `bun:"analysisId"`
 	Plugin        string      `bun:"plugin"`
+	CreatedOn     time.Time   `bun:"created_on,default:current_timestamp"`
 }
