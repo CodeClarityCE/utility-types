@@ -1,9 +1,9 @@
 package codeclarity
 
 import (
-	"time"
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	"time"
 )
 
 type Result struct {
