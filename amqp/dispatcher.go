@@ -27,10 +27,11 @@ type PluginDispatcherMessage struct {
 	Plugin     string    `json:"sbom"`
 }
 
-// Sbom -> Dispatcher
+// Sbom -> PackageFollower
 type SbomPackageFollowerMessage struct {
 	AnalysisId    uuid.UUID `json:"analysis_id"`
 	PackagesNames []string  `json:"package_name"`
+	Language      string    `json:"language"` // "javascript", "php", etc.
 }
 
 // API -> Dispatcher

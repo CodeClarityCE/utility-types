@@ -11,10 +11,11 @@ type Package struct {
 	bun.BaseModel `bun:"table:package,alias:p"`
 	Id            uuid.UUID      `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
 	Name          string         `bun:"name"`
+	Language      string         `bun:"language"`
 	Description   string         `bun:"description"`
 	Homepage      string         `bun:"homepage"`
 	LatestVersion string         `bun:"latest_version"`
-	Versions      []Version      `bun:"versions,rel:has-many,join:id=packageId"`
+	Versions      []Version      `bun:"versions,rel:has-many,join:id=package_id"`
 	Time          time.Time      `bun:"time"`
 	Keywords      []string       `bun:"keywords"`
 	Source        Source         `bun:"source"`
@@ -34,13 +35,15 @@ type Source struct {
 }
 
 type Version struct {
-	bun.BaseModel   `bun:"table:js_version,alias:pv"`
+	bun.BaseModel   `bun:"table:version,alias:v"`
 	Id              uuid.UUID         `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
-	PackageID       uuid.UUID         `bun:"packageId,type:uuid"`
+	PackageID       uuid.UUID         `bun:"package_id,type:uuid"`
 	Version         string            `bun:"version"`
 	Dependencies    map[string]string `bun:"dependencies"`
 	DevDependencies map[string]string `bun:"dev_dependencies"`
 	Extra           map[string]any    `bun:"extra"`
+	CreatedAt       time.Time         `bun:"created_at"`
+	UpdatedAt       time.Time         `bun:"updated_at"`
 }
 
 type VersionEdge struct{}
