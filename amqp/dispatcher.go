@@ -51,13 +51,15 @@ type DispatcherDownloaderMessage struct {
 	OrganizationId uuid.UUID `json:"organization_id"`
 }
 
-// Downloader -> Dispatcer
-// TODO change type
+// Downloader -> Dispatcher
 type DownloaderDispatcherMessage struct {
-	AnalysisId     uuid.UUID `json:"analysis_id"`
-	ProjectId      uuid.UUID `json:"project_id"`
-	IntegrationId  uuid.UUID `json:"integration_id"`
-	OrganizationId uuid.UUID `json:"organization_id"`
+	AnalysisId          uuid.UUID `json:"analysis_id"`
+	ProjectId           uuid.UUID `json:"project_id"`
+	IntegrationId       uuid.UUID `json:"integration_id"`
+	OrganizationId      uuid.UUID `json:"organization_id"`
+	DetectedLanguages   []string  `json:"detected_languages"`
+	PrimaryLanguage     string    `json:"primary_language"`
+	DetectionConfidence float64   `json:"detection_confidence"`
 }
 
 type Config struct {
