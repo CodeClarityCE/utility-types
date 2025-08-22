@@ -1,18 +1,20 @@
-package ecosystem
+package boilerplates
 
 import (
 	"fmt"
 	"log"
+	
+	"github.com/CodeClarityCE/utility-types/ecosystem"
 )
 
 // GenericResultMerger provides generic functionality for merging analysis results
 type GenericResultMerger[T any] struct {
-	strategy      MergeStrategy
+	strategy      ecosystem.MergeStrategy
 	mergeFunction func([]T) T
 }
 
 // NewGenericResultMerger creates a new generic result merger with a custom merge function
-func NewGenericResultMerger[T any](strategy MergeStrategy, mergeFunc func([]T) T) *GenericResultMerger[T] {
+func NewGenericResultMerger[T any](strategy ecosystem.MergeStrategy, mergeFunc func([]T) T) *GenericResultMerger[T] {
 	return &GenericResultMerger[T]{
 		strategy:      strategy,
 		mergeFunction: mergeFunc,

@@ -1,4 +1,4 @@
-package ecosystem
+package boilerplates
 
 import (
 	"fmt"
@@ -51,8 +51,8 @@ func (e ConfigError) Error() string {
 	return fmt.Sprintf("config error for %s: %s", e.Field, e.Message)
 }
 
-// NewConfigService creates a new ConfigService by reading all environment variables
-func NewConfigService() (*ConfigService, error) {
+// CreateConfigService creates a new ConfigService by reading all environment variables
+func CreateConfigService() (*ConfigService, error) {
 	config := &ConfigService{}
 	
 	// Load database configuration

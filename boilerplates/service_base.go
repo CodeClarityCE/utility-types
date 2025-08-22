@@ -1,4 +1,4 @@
-package ecosystem
+package boilerplates
 
 import (
 	"database/sql"
@@ -14,9 +14,10 @@ import (
 )
 
 type ServiceDatabases struct {
-	CodeClarity *sql.DB
+	CodeClarity *bun.DB
 	Knowledge   *bun.DB
 	Plugins     *bun.DB
+	Config      *bun.DB
 }
 
 type QueueConfig struct {
@@ -33,8 +34,8 @@ type ServiceBase struct {
 	queues    []QueueConfig
 }
 
-func NewServiceBase() (*ServiceBase, error) {
-	configSvc, err := NewConfigService()
+func CreateServiceBase() (*ServiceBase, error) {
+	configSvc, err := CreateConfigService()
 	if err != nil {
 		return nil, fmt.Errorf("config service init failed: %w", err)
 	}
@@ -85,10 +86,21 @@ func connectServiceDatabases(configSvc *ConfigService) (*ServiceDatabases, error
 	pluginsSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(pluginsDSN), pgdriver.WithTimeout(50*time.Second)))
 	pluginsDB := bun.NewDB(pluginsSqlDB, pgdialect.New())
 
+	// Config Database (using bun.DB)
+	configDSN := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		configSvc.Database.User, configSvc.Database.Password,
+		configSvc.Database.Host, configSvc.Database.Port,
+		dbhelper.Config.Database.Config)
+	configSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(configDSN), pgdriver.WithTimeout(50*time.Second)))
+	configDB := bun.NewDB(configSqlDB, pgdialect.New())
+
+	codeClarityDB := bun.NewDB(codeClaritySqlDB, pgdialect.New())
+
 	return &ServiceDatabases{
-		CodeClarity: codeClaritySqlDB,
+		CodeClarity: codeClarityDB,
 		Knowledge:   knowledgeDB,
 		Plugins:     pluginsDB,
+		Config:      configDB,
 	}, nil
 }
 
@@ -235,6 +247,11 @@ func (sb *ServiceBase) Close() error {
 		if sb.DB.Plugins != nil {
 			if err := sb.DB.Plugins.Close(); err != nil {
 				log.Printf("Error closing Plugins database: %v", err)
+			}
+		}
+		if sb.DB.Config != nil {
+			if err := sb.DB.Config.Close(); err != nil {
+				log.Printf("Error closing Config database: %v", err)
 			}
 		}
 	}

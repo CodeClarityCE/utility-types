@@ -1,26 +1,28 @@
-package ecosystem
+package boilerplates
 
 import (
 	"fmt"
 	"log"
+
+	"github.com/CodeClarityCE/utility-types/ecosystem"
 )
 
 // LicenseWorkspaceInfo represents workspace license information in a generic way
 // This mirrors the structure from the license plugin without importing it directly
 type LicenseWorkspaceInfo struct {
-	LicensesDepMap              map[string][]string            `json:"licensesDepMap"`
-	NonSpdxLicensesDepMap       map[string][]string            `json:"nonSpdxLicensesDepMap"`
-	LicenseComplianceViolations []string                       `json:"licenseComplianceViolations"`
+	LicensesDepMap              map[string][]string              `json:"licensesDepMap"`
+	NonSpdxLicensesDepMap       map[string][]string              `json:"nonSpdxLicensesDepMap"`
+	LicenseComplianceViolations []string                         `json:"licenseComplianceViolations"`
 	DependencyInfo              map[string]LicenseDependencyInfo `json:"dependencyInfo"`
 }
 
 // LicenseDependencyInfo represents dependency information for licenses
 type LicenseDependencyInfo struct {
-	Name                string   `json:"name"`
-	Version             string   `json:"version"`
-	Licenses            []string `json:"licenses"`
-	LicenseExpression   string   `json:"licenseExpression"`
-	LicenseViolations   []string `json:"licenseViolations"`
+	Name              string   `json:"name"`
+	Version           string   `json:"version"`
+	Licenses          []string `json:"licenses"`
+	LicenseExpression string   `json:"licenseExpression"`
+	LicenseViolations []string `json:"licenseViolations"`
 }
 
 // LicenseAnalysisStats represents license analysis statistics
@@ -35,8 +37,8 @@ type LicenseAnalysisStats struct {
 // LicenseOutput represents the complete license analysis output
 type LicenseOutput struct {
 	WorkSpaces     map[string]LicenseWorkspaceInfo `json:"workSpaces"`
-	AnalysisStats  LicenseAnalysisStats           `json:"analysisStats"`
-	AnalysisStatus string                         `json:"status"`
+	AnalysisStats  LicenseAnalysisStats            `json:"analysisStats"`
+	AnalysisStatus string                          `json:"status"`
 }
 
 // LicenseResultMerger provides merge functionality for license analysis results
@@ -46,14 +48,14 @@ type LicenseResultMerger struct {
 }
 
 // NewLicenseResultMerger creates a new license result merger
-func NewLicenseResultMerger(strategy MergeStrategy) *LicenseResultMerger {
+func NewLicenseResultMerger(strategy ecosystem.MergeStrategy) *LicenseResultMerger {
 	utils := NewMergerUtils()
-	
+
 	merger := &LicenseResultMerger{
 		GenericResultMerger: NewGenericResultMerger(strategy, mergeLicenseOutputs),
-		utils:              utils,
+		utils:               utils,
 	}
-	
+
 	return merger
 }
 
@@ -72,7 +74,7 @@ func mergeLicenseOutputs(outputs []LicenseOutput) LicenseOutput {
 	}
 
 	utils := NewMergerUtils()
-	
+
 	// Start with the first output as base
 	merged := LicenseOutput{
 		WorkSpaces:     make(map[string]LicenseWorkspaceInfo),
@@ -157,11 +159,11 @@ func mergeDependencyInfo(existing, new map[string]LicenseDependencyInfo, utils *
 		if existingInfo, exists := merged[key]; exists {
 			// Merge dependency info
 			merged[key] = LicenseDependencyInfo{
-				Name:                newInfo.Name, // Use new name (should be the same)
-				Version:             newInfo.Version, // Use new version (should be the same)
-				Licenses:            utils.MergeStringSlices(existingInfo.Licenses, newInfo.Licenses),
-				LicenseExpression:   mergeLicenseExpression(existingInfo.LicenseExpression, newInfo.LicenseExpression),
-				LicenseViolations:   utils.MergeStringSlices(existingInfo.LicenseViolations, newInfo.LicenseViolations),
+				Name:              newInfo.Name,    // Use new name (should be the same)
+				Version:           newInfo.Version, // Use new version (should be the same)
+				Licenses:          utils.MergeStringSlices(existingInfo.Licenses, newInfo.Licenses),
+				LicenseExpression: mergeLicenseExpression(existingInfo.LicenseExpression, newInfo.LicenseExpression),
+				LicenseViolations: utils.MergeStringSlices(existingInfo.LicenseViolations, newInfo.LicenseViolations),
 			}
 		} else {
 			merged[key] = newInfo

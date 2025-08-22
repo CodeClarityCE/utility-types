@@ -1,4 +1,4 @@
-package ecosystem
+package boilerplates
 
 import (
 	"context"
@@ -43,10 +43,10 @@ type AnalysisHandler interface {
 	) (map[string]any, codeclarity.AnalysisStatus, error)
 }
 
-// NewPluginBase creates a new PluginBase with all common setup handled
-func NewPluginBase() (*PluginBase, error) {
+// CreatePluginBase creates a new PluginBase with all common setup handled
+func CreatePluginBase() (*PluginBase, error) {
 	// Initialize configuration service
-	configSvc, err := NewConfigService()
+	configSvc, err := CreateConfigService()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize config service: %w", err)
 	}
