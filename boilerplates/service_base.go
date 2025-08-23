@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	dbhelper "github.com/CodeClarityCE/utility-dbhelper/helper"
@@ -65,7 +68,14 @@ func connectServiceDatabases(configSvc *ConfigService) (*ServiceDatabases, error
 		configSvc.Database.User, configSvc.Database.Password,
 		configSvc.Database.Host, configSvc.Database.Port,
 		dbhelper.Config.Database.Results)
-	codeClaritySqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(codeClarityDSN), pgdriver.WithTimeout(50*time.Second)))
+	codeClaritySqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(codeClarityDSN), pgdriver.WithTimeout(30*time.Second)))
+	
+	// Optimize connection pool settings for CodeClarity DB
+	codeClaritySqlDB.SetMaxOpenConns(25)           // Limit concurrent connections
+	codeClaritySqlDB.SetMaxIdleConns(5)            // Keep some connections alive
+	codeClaritySqlDB.SetConnMaxLifetime(5*time.Minute) // Rotate connections
+	codeClaritySqlDB.SetConnMaxIdleTime(1*time.Minute) // Close idle connections
+	
 	if err := codeClaritySqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("codeclarity database ping failed: %w", err)
 	}
@@ -75,7 +85,14 @@ func connectServiceDatabases(configSvc *ConfigService) (*ServiceDatabases, error
 		configSvc.Database.User, configSvc.Database.Password,
 		configSvc.Database.Host, configSvc.Database.Port,
 		dbhelper.Config.Database.Knowledge)
-	knowledgeSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(knowledgeDSN), pgdriver.WithTimeout(50*time.Second)))
+	knowledgeSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(knowledgeDSN), pgdriver.WithTimeout(30*time.Second)))
+	
+	// Optimize connection pool settings for Knowledge DB (read-heavy workload)
+	knowledgeSqlDB.SetMaxOpenConns(20)           
+	knowledgeSqlDB.SetMaxIdleConns(8)            
+	knowledgeSqlDB.SetConnMaxLifetime(5*time.Minute)
+	knowledgeSqlDB.SetConnMaxIdleTime(2*time.Minute)
+	
 	knowledgeDB := bun.NewDB(knowledgeSqlDB, pgdialect.New())
 
 	// Plugins Database (using bun.DB)
@@ -83,7 +100,14 @@ func connectServiceDatabases(configSvc *ConfigService) (*ServiceDatabases, error
 		configSvc.Database.User, configSvc.Database.Password,
 		configSvc.Database.Host, configSvc.Database.Port,
 		dbhelper.Config.Database.Plugins)
-	pluginsSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(pluginsDSN), pgdriver.WithTimeout(50*time.Second)))
+	pluginsSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(pluginsDSN), pgdriver.WithTimeout(30*time.Second)))
+	
+	// Optimize connection pool settings for Plugins DB (moderate workload)
+	pluginsSqlDB.SetMaxOpenConns(15)           
+	pluginsSqlDB.SetMaxIdleConns(3)            
+	pluginsSqlDB.SetConnMaxLifetime(5*time.Minute)
+	pluginsSqlDB.SetConnMaxIdleTime(1*time.Minute)
+	
 	pluginsDB := bun.NewDB(pluginsSqlDB, pgdialect.New())
 
 	// Config Database (using bun.DB)
@@ -91,7 +115,14 @@ func connectServiceDatabases(configSvc *ConfigService) (*ServiceDatabases, error
 		configSvc.Database.User, configSvc.Database.Password,
 		configSvc.Database.Host, configSvc.Database.Port,
 		dbhelper.Config.Database.Config)
-	configSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(configDSN), pgdriver.WithTimeout(50*time.Second)))
+	configSqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(configDSN), pgdriver.WithTimeout(30*time.Second)))
+	
+	// Optimize connection pool settings for Config DB (low workload)
+	configSqlDB.SetMaxOpenConns(10)           
+	configSqlDB.SetMaxIdleConns(2)            
+	configSqlDB.SetConnMaxLifetime(5*time.Minute)
+	configSqlDB.SetConnMaxIdleTime(1*time.Minute)
+	
 	configDB := bun.NewDB(configSqlDB, pgdialect.New())
 
 	codeClarityDB := bun.NewDB(codeClaritySqlDB, pgdialect.New())
@@ -137,6 +168,17 @@ func (sb *ServiceBase) startQueueListener(config QueueConfig) error {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
 
+	// Optimize channel performance with prefetch settings
+	err = ch.Qos(
+		10,    // prefetch count - process up to 10 messages concurrently
+		0,     // prefetch size - 0 means no limit on message size
+		false, // global - apply per consumer
+	)
+	if err != nil {
+		ch.Close()
+		return fmt.Errorf("failed to set QoS: %w", err)
+	}
+
 	sb.channels[config.Name] = ch
 
 	q, err := ch.QueueDeclare(
@@ -145,16 +187,17 @@ func (sb *ServiceBase) startQueueListener(config QueueConfig) error {
 		false,          // delete when unused
 		false,          // exclusive
 		false,          // no-wait
-		nil,            // arguments
+		nil,            // arguments - remove queue limits for compatibility
 	)
 	if err != nil {
+		ch.Close()
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,  // auto-ack - changed to manual ack for reliability
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -165,11 +208,32 @@ func (sb *ServiceBase) startQueueListener(config QueueConfig) error {
 	}
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Queue %s handler panicked: %v", config.Name, r)
+			}
+		}()
+		
 		for d := range msgs {
 			start := time.Now()
-			config.Handler(d)
-			log.Printf("Queue %s processed message in %v", config.Name, time.Since(start))
+			
+			// Process message with error handling
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Printf("Queue %s message handler panicked: %v", config.Name, r)
+						d.Nack(false, true) // Requeue message on panic
+						return
+					}
+				}()
+				
+				config.Handler(d)
+				d.Ack(false) // Acknowledge successful processing
+				log.Printf("Queue %s processed message in %v", config.Name, time.Since(start))
+			}()
 		}
+		
+		log.Printf("Queue %s consumer stopped", config.Name)
 	}()
 
 	return nil
@@ -216,8 +280,212 @@ func (sb *ServiceBase) SendMessage(queueName string, data []byte) error {
 }
 
 func (sb *ServiceBase) WaitForever() {
-	forever := make(chan bool)
-	<-forever
+	for {
+		// Set up signal handling for graceful shutdown
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		
+		// Monitor connection health
+		connClosed := make(chan bool, 1)
+		go sb.monitorConnection(connClosed)
+		
+		// Wait for shutdown signal or connection failure
+		select {
+		case sig := <-sigChan:
+			log.Printf("Received signal %v, shutting down...", sig)
+			if err := sb.Close(); err != nil {
+				log.Printf("Error during shutdown: %v", err)
+			}
+			return // Exit completely on manual shutdown
+		case <-connClosed:
+			log.Printf("Connection lost, attempting restart in 10 seconds...")
+			if err := sb.Close(); err != nil {
+				log.Printf("Error during shutdown: %v", err)
+			}
+			
+			// Wait before attempting restart
+			time.Sleep(10 * time.Second)
+			
+			// Attempt to reconnect
+			if err := sb.restart(); err != nil {
+				log.Printf("Restart failed: %v, will retry in 30 seconds...", err)
+				time.Sleep(30 * time.Second)
+				continue // Retry the restart loop
+			}
+			
+			log.Printf("Service restarted successfully")
+			// Continue the loop to monitor the new connections
+		}
+	}
+}
+
+// restart attempts to reinitialize all connections
+func (sb *ServiceBase) restart() error {
+	log.Printf("Attempting to restart service connections...")
+	
+	// Reinitialize config service
+	configSvc, err := CreateConfigService()
+	if err != nil {
+		return fmt.Errorf("config service restart failed: %w", err)
+	}
+	sb.ConfigSvc = configSvc
+	
+	// Reinitialize databases
+	db, err := connectServiceDatabases(configSvc)
+	if err != nil {
+		return fmt.Errorf("database restart failed: %w", err)
+	}
+	sb.DB = db
+	
+	// Reinitialize AMQP connection
+	conn, err := connectAMQP(configSvc)
+	if err != nil {
+		return fmt.Errorf("AMQP restart failed: %w", err)
+	}
+	sb.conn = conn
+	
+	// Clear old channels
+	sb.channels = make(map[string]*amqp.Channel)
+	
+	// Restart queue listeners
+	if err := sb.StartListening(); err != nil {
+		return fmt.Errorf("queue listener restart failed: %w", err)
+	}
+	
+	return nil
+}
+
+func (sb *ServiceBase) monitorConnection(closeChan chan bool) {
+	defer close(closeChan)
+	
+	// Monitor AMQP connection
+	notifyClose := make(chan *amqp.Error, 1)
+	if sb.conn != nil {
+		sb.conn.NotifyClose(notifyClose)
+	}
+	
+	// Monitor database connections with periodic health checks
+	dbHealthTicker := time.NewTicker(30 * time.Second)
+	defer dbHealthTicker.Stop()
+	
+	for {
+		select {
+		case err := <-notifyClose:
+			if err != nil {
+				log.Printf("AMQP connection lost: %v", err)
+				closeChan <- true
+				return
+			}
+			log.Printf("AMQP connection closed gracefully")
+			return
+			
+		case <-dbHealthTicker.C:
+			// Check database health
+			if sb.DB != nil {
+				if err := sb.checkDatabaseHealth(); err != nil {
+					log.Printf("Database health check failed: %v", err)
+					closeChan <- true
+					return
+				}
+			}
+		}
+	}
+}
+
+func (sb *ServiceBase) checkDatabaseHealth() error {
+	// Check each database connection with timeout
+	timeout := 5 * time.Second
+	
+	if sb.DB.CodeClarity != nil {
+		done := make(chan error, 1)
+		go func() {
+			done <- sb.DB.CodeClarity.DB.Ping()
+		}()
+		
+		select {
+		case err := <-done:
+			if err != nil {
+				return fmt.Errorf("CodeClarity DB ping failed: %w", err)
+			}
+		case <-time.After(timeout):
+			return fmt.Errorf("CodeClarity DB ping timeout")
+		}
+	}
+	
+	if sb.DB.Knowledge != nil {
+		done := make(chan error, 1)
+		go func() {
+			done <- sb.DB.Knowledge.DB.Ping()
+		}()
+		
+		select {
+		case err := <-done:
+			if err != nil {
+				return fmt.Errorf("Knowledge DB ping failed: %w", err)
+			}
+		case <-time.After(timeout):
+			return fmt.Errorf("Knowledge DB ping timeout")
+		}
+	}
+	
+	if sb.DB.Plugins != nil {
+		done := make(chan error, 1)
+		go func() {
+			done <- sb.DB.Plugins.DB.Ping()
+		}()
+		
+		select {
+		case err := <-done:
+			if err != nil {
+				return fmt.Errorf("Plugins DB ping failed: %w", err)
+			}
+		case <-time.After(timeout):
+			return fmt.Errorf("Plugins DB ping timeout")
+		}
+	}
+	
+	if sb.DB.Config != nil {
+		done := make(chan error, 1)
+		go func() {
+			done <- sb.DB.Config.DB.Ping()
+		}()
+		
+		select {
+		case err := <-done:
+			if err != nil {
+				return fmt.Errorf("Config DB ping failed: %w", err)
+			}
+		case <-time.After(timeout):
+			return fmt.Errorf("Config DB ping timeout")
+		}
+	}
+	
+	return nil
+}
+
+// GetHealthStatus returns the current health status of the service
+func (sb *ServiceBase) GetHealthStatus() map[string]interface{} {
+	status := map[string]interface{}{
+		"healthy":   true,
+		"timestamp": time.Now().Unix(),
+		"database":  map[string]bool{},
+		"amqp":      true,
+	}
+	
+	// Check database health
+	if err := sb.checkDatabaseHealth(); err != nil {
+		status["healthy"] = false
+		status["database_error"] = err.Error()
+	}
+	
+	// Check AMQP health
+	if sb.conn == nil || sb.conn.IsClosed() {
+		status["healthy"] = false
+		status["amqp"] = false
+		status["amqp_error"] = "connection closed"
+	}
+	
+	return status
 }
 
 func (sb *ServiceBase) Close() error {
