@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ecosystem Types",
+  "types": {
+    "DetectedLanguage": {
+      "name": "DetectedLanguage",
+      "type": "interface",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "optional": false
+        }
+      ],
+      "isInterface": true,
+      "isEnum": false
+    },
+    "EcosystemInfo": {
+      "name": "EcosystemInfo",
+      "type": "interface",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "ecosystem",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "packageManagerPattern",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "defaultPackageManager",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "website",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "purlType",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "registryUrl",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "tools",
+          "type": "string[]",
+          "optional": false
+        }
+      ],
+      "isInterface": true,
+      "isEnum": false
+    },
+    "MergeStrategy": {
+      "name": "MergeStrategy",
+      "type": "enum",
+      "values": [
+        "UNION = 'union'",
+        "INTERSECTION = 'intersection'",
+        "PRIORITY = 'priority'"
+      ],
+      "isInterface": false,
+      "isEnum": true
+    },
+    "PluginEcosystemMap": {
+      "name": "PluginEcosystemMap",
+      "type": "Record\u003cstring, EcosystemInfo\u003e",
+      "isInterface": false,
+      "isEnum": false
+    }
+  }
+}
