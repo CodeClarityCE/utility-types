@@ -1,8 +1,8 @@
 package ecosystem
 
 import (
-	"time"
 	"github.com/uptrace/bun"
+	"time"
 )
 
 // BasicEcosystemHandler provides a basic implementation of EcosystemHandler
@@ -35,7 +35,7 @@ func (h *BasicEcosystemHandler) GetEcosystemInfo() EcosystemInfo {
 func (h *BasicEcosystemHandler) ProcessLicenses(knowledgeDB *bun.DB, sbom interface{}, licensePolicy interface{}, start time.Time) interface{} {
 	// Basic implementation - should be overridden by specific ecosystem handlers
 	return map[string]interface{}{
-		"status": "not_implemented",
+		"status":  "not_implemented",
 		"message": "License processing not implemented for " + h.languageID,
 	}
 }
@@ -45,7 +45,7 @@ func (h *BasicEcosystemHandler) ProcessLicenses(knowledgeDB *bun.DB, sbom interf
 func (h *BasicEcosystemHandler) ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom interface{}, start time.Time) interface{} {
 	// Basic implementation - should be overridden by specific ecosystem handlers
 	return map[string]interface{}{
-		"status": "not_implemented",
+		"status":  "not_implemented",
 		"message": "Vulnerability processing not implemented for " + h.languageID,
 	}
 }

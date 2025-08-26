@@ -18,10 +18,10 @@ type ConfigService struct {
 
 // DatabaseConfig holds database connection configuration
 type DatabaseConfig struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
+	Host     string        `json:"host"`
+	Port     string        `json:"port"`
+	User     string        `json:"user"`
+	Password string        `json:"password"`
 	Timeout  time.Duration `json:"timeout"`
 }
 
@@ -54,7 +54,7 @@ func (e ConfigError) Error() string {
 // CreateConfigService creates a new ConfigService by reading all environment variables
 func CreateConfigService() (*ConfigService, error) {
 	config := &ConfigService{}
-	
+
 	// Load database configuration
 	dbConfig, err := loadDatabaseConfig()
 	if err != nil {
@@ -79,22 +79,22 @@ func CreateConfigService() (*ConfigService, error) {
 // loadDatabaseConfig loads database configuration from environment variables
 func loadDatabaseConfig() (DatabaseConfig, error) {
 	var errors []ConfigError
-	
+
 	host := os.Getenv("PG_DB_HOST")
 	if host == "" {
 		errors = append(errors, ConfigError{"PG_DB_HOST", "required environment variable not set"})
 	}
-	
+
 	port := os.Getenv("PG_DB_PORT")
 	if port == "" {
 		errors = append(errors, ConfigError{"PG_DB_PORT", "required environment variable not set"})
 	}
-	
+
 	user := os.Getenv("PG_DB_USER")
 	if user == "" {
 		errors = append(errors, ConfigError{"PG_DB_USER", "required environment variable not set"})
 	}
-	
+
 	password := os.Getenv("PG_DB_PASSWORD")
 	if password == "" {
 		errors = append(errors, ConfigError{"PG_DB_PASSWORD", "required environment variable not set"})
@@ -128,33 +128,33 @@ func loadAMQPConfig() (AMQPConfig, error) {
 	if protocol == "" {
 		protocol = "amqp"
 	}
-	
+
 	host := os.Getenv("AMQP_HOST")
 	if host == "" {
 		host = "localhost"
 	}
-	
+
 	port := os.Getenv("AMQP_PORT")
 	if port == "" {
 		port = "5672"
 	}
-	
+
 	user := os.Getenv("AMQP_USER")
 	if user == "" {
 		user = "guest"
 	}
-	
+
 	password := os.Getenv("AMQP_PASSWORD")
 	if password == "" {
 		password = "guest"
 	}
-	
+
 	// Construct URL if not provided
 	url := os.Getenv("AMQP_URL")
 	if url == "" {
 		url = fmt.Sprintf("%s://%s:%s@%s:%s/", protocol, user, password, host, port)
 	}
-	
+
 	return AMQPConfig{
 		URL:      url,
 		Protocol: protocol,
@@ -186,7 +186,7 @@ func loadGeneralConfig() GeneralConfig {
 // GetDatabaseDSN constructs a PostgreSQL DSN for the specified database
 func (cs *ConfigService) GetDatabaseDSN(dbName string) string {
 	var actualDBName string
-	
+
 	// Map logical database names to actual database names using dbhelper
 	switch dbName {
 	case "results", "codeclarity":

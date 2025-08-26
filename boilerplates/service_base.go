@@ -48,7 +48,7 @@ func CreateServiceBase() (*ServiceBase, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read service config: %w", err)
 	}
-	
+
 	return CreateServiceBaseWithName(config.Name)
 }
 

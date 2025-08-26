@@ -9,17 +9,17 @@ import (
 
 // EcosystemInfo contains information about a package ecosystem
 type EcosystemInfo struct {
-	Name                     string `json:"name"`
-	Ecosystem                string `json:"ecosystem"`
-	Language                 string `json:"language"`
-	PackageManagerPattern    string `json:"packageManagerPattern"` // Will be converted to RegExp in frontend
-	DefaultPackageManager    string `json:"defaultPackageManager"`
-	Icon                     string `json:"icon"`
-	Color                    string `json:"color"`
-	Website                  string `json:"website"`
-	PurlType                 string `json:"purlType"`
-	RegistryUrl              string `json:"registryUrl"`
-	Tools                    []string `json:"tools"`
+	Name                  string   `json:"name"`
+	Ecosystem             string   `json:"ecosystem"`
+	Language              string   `json:"language"`
+	PackageManagerPattern string   `json:"packageManagerPattern"` // Will be converted to RegExp in frontend
+	DefaultPackageManager string   `json:"defaultPackageManager"`
+	Icon                  string   `json:"icon"`
+	Color                 string   `json:"color"`
+	Website               string   `json:"website"`
+	PurlType              string   `json:"purlType"`
+	RegistryUrl           string   `json:"registryUrl"`
+	Tools                 []string `json:"tools"`
 }
 
 // PluginEcosystemMap maps plugin names to their ecosystem information
@@ -82,18 +82,18 @@ type DetectedLanguage struct {
 type EcosystemHandler interface {
 	// GetLanguageID returns the language identifier (e.g., "JS", "PHP")
 	GetLanguageID() string
-	
+
 	// GetEcosystemInfo returns the ecosystem information
 	GetEcosystemInfo() EcosystemInfo
-	
+
 	// ProcessLicenses processes license analysis for this ecosystem
 	// Using interface{} for now to avoid dependency issues, will be properly typed later
 	ProcessLicenses(knowledgeDB *bun.DB, sbom interface{}, licensePolicy interface{}, start time.Time) interface{}
-	
+
 	// ProcessVulnerabilities processes vulnerability analysis for this ecosystem
 	// Using interface{} for now to avoid dependency issues, will be properly typed later
 	ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom interface{}, start time.Time) interface{}
-	
+
 	// SupportsLanguageID checks if this handler supports the given language ID
 	SupportsLanguageID(languageID string) bool
 }
@@ -102,7 +102,7 @@ type EcosystemHandler interface {
 type ResultMerger[T any] interface {
 	// MergeWorkspaces merges results from multiple language ecosystems into a unified result
 	MergeWorkspaces(results []T) T
-	
+
 	// GetMergeStrategy returns the merge strategy used by this merger
 	GetMergeStrategy() string
 }
@@ -185,15 +185,15 @@ func (em *EcosystemMapper) GetEcosystemFromPurl(purl string) (string, bool) {
 	if purl == "" || len(purl) < 5 || purl[:4] != "pkg:" {
 		return "", false
 	}
-	
+
 	// Split by '/' to get type
 	parts := regexp.MustCompile(`[/:]`).Split(purl, -1)
 	if len(parts) < 2 {
 		return "", false
 	}
-	
+
 	purlType := parts[1] // parts[0] is "pkg", parts[1] is the type
-	
+
 	// Map PURL types to our ecosystem names
 	purlToEcosystem := map[string]string{
 		"npm":      "npm",
@@ -205,11 +205,11 @@ func (em *EcosystemMapper) GetEcosystemFromPurl(purl string) (string, bool) {
 		"golang":   "go",
 		"gem":      "rubygems",
 	}
-	
+
 	if ecosystem, exists := purlToEcosystem[purlType]; exists {
 		return ecosystem, true
 	}
-	
+
 	return "", false
 }
 
@@ -219,16 +219,16 @@ func (em *EcosystemMapper) DetectEcosystemFromName(name string) (string, bool) {
 	if len(name) > 0 && regexp.MustCompile(`^[^@][^/]*/[^/]+$`).MatchString(name) {
 		return "packagist", true
 	}
-	
+
 	// npm scoped packages start with @
 	if len(name) > 0 && name[0] == '@' {
 		return "npm", true
 	}
-	
+
 	// Go modules typically have domain/path format
 	if regexp.MustCompile(`^[^/]+\.[^/]+/[^/]`).MatchString(name) {
 		return "go", true
 	}
-	
+
 	return "", false
 }

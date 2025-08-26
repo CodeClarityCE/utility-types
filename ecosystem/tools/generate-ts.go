@@ -14,15 +14,15 @@ import (
 
 // TypeScriptType represents a TypeScript type definition
 type TypeScriptType struct {
-	Name        string                 `json:"name"`
-	Type        string                 `json:"type"`
-	Fields      []TypeScriptField      `json:"fields,omitempty"`
-	Values      []string               `json:"values,omitempty"`      // for enums
-	Extends     string                 `json:"extends,omitempty"`     // for inheritance
-	Implements  []string               `json:"implements,omitempty"`  // for interface implementation
-	IsInterface bool                   `json:"isInterface"`
-	IsEnum      bool                   `json:"isEnum"`
-	Comment     string                 `json:"comment,omitempty"`
+	Name        string            `json:"name"`
+	Type        string            `json:"type"`
+	Fields      []TypeScriptField `json:"fields,omitempty"`
+	Values      []string          `json:"values,omitempty"`     // for enums
+	Extends     string            `json:"extends,omitempty"`    // for inheritance
+	Implements  []string          `json:"implements,omitempty"` // for interface implementation
+	IsInterface bool              `json:"isInterface"`
+	IsEnum      bool              `json:"isEnum"`
+	Comment     string            `json:"comment,omitempty"`
 }
 
 // TypeScriptField represents a field in a TypeScript interface/type
@@ -56,7 +56,7 @@ func (c *GoToTypeScriptConverter) ConvertStruct(structType reflect.Type, name st
 
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
-		
+
 		// Skip unexported fields
 		if !field.IsExported() {
 			continue
@@ -107,8 +107,8 @@ func (c *GoToTypeScriptConverter) convertGoTypeToTypescript(goType reflect.Type)
 	case reflect.String:
 		return "string"
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		 reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		 reflect.Float32, reflect.Float64:
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64:
 		return "number"
 	case reflect.Bool:
 		return "boolean"
@@ -118,7 +118,7 @@ func (c *GoToTypeScriptConverter) convertGoTypeToTypescript(goType reflect.Type)
 	case reflect.Map:
 		keyType := c.convertGoTypeToTypescript(goType.Key())
 		valueType := c.convertGoTypeToTypescript(goType.Elem())
-		
+
 		// TypeScript record type
 		if keyType == "string" {
 			return fmt.Sprintf("Record<%s, %s>", keyType, valueType)
@@ -133,7 +133,7 @@ func (c *GoToTypeScriptConverter) convertGoTypeToTypescript(goType reflect.Type)
 		if goType == reflect.TypeOf(time.Time{}) {
 			return "string" // ISO date string
 		}
-		
+
 		// For custom structs, use the struct name
 		return goType.Name()
 	default:
@@ -184,7 +184,7 @@ func (c *GoToTypeScriptConverter) writeTypeDefinition(sb *strings.Builder, tsTyp
 	} else if tsType.IsInterface {
 		// Write interface
 		sb.WriteString(fmt.Sprintf("export interface %s", tsType.Name))
-		
+
 		// Write extends clause
 		if tsType.Extends != "" {
 			sb.WriteString(fmt.Sprintf(" extends %s", tsType.Extends))
@@ -202,12 +202,12 @@ func (c *GoToTypeScriptConverter) writeTypeDefinition(sb *strings.Builder, tsTyp
 			if field.Comment != "" {
 				sb.WriteString(fmt.Sprintf("  /** %s */\n", field.Comment))
 			}
-			
+
 			optional := ""
 			if field.Optional {
 				optional = "?"
 			}
-			
+
 			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", field.Name, optional, field.Type))
 		}
 

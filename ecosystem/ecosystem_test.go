@@ -108,8 +108,8 @@ func TestHandlerRegistry(t *testing.T) {
 
 func TestBasicEcosystemHandler(t *testing.T) {
 	ecosystemInfo := EcosystemInfo{
-		Name:     "Test Ecosystem",
-		Language: "TestLang",
+		Name:      "Test Ecosystem",
+		Language:  "TestLang",
 		Ecosystem: "test",
 	}
 

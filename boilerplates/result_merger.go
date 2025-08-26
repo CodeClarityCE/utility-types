@@ -3,7 +3,7 @@ package boilerplates
 import (
 	"fmt"
 	"log"
-	
+
 	"github.com/CodeClarityCE/utility-types/ecosystem"
 )
 

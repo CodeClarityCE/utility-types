@@ -17,19 +17,19 @@ import (
 type SBOMAnalyzer interface {
 	// AnalyzeProject performs the SBOM analysis for a specific language
 	AnalyzeProject(projectPath string, analysisId string, knowledgeDB interface{}) (SBOMOutput, error)
-	
+
 	// CanAnalyze checks if this analyzer can handle the given project
 	CanAnalyze(projectPath string) bool
-	
+
 	// GetLanguage returns the language this analyzer handles
 	GetLanguage() string
-	
+
 	// DetectFramework detects the framework used in the project (optional, can return empty string)
 	DetectFramework(projectPath string) string
-	
+
 	// ConvertToMap converts the analyzer's output to map[string]any for storage
 	ConvertToMap(output SBOMOutput) map[string]any
-	
+
 	// GetDependencyCount returns the total number of dependencies found
 	GetDependencyCount(output SBOMOutput) int
 }
@@ -76,12 +76,12 @@ func (h *GenericSBOMHandler) performSBOMAnalysis(
 
 	// Perform the analysis
 	log.Printf("%s SBOM Analysis - Starting analysis for project: %s", h.Analyzer.GetLanguage(), projectPath)
-	
+
 	var knowledgeDB interface{}
 	if databases.Knowledge != nil {
 		knowledgeDB = databases.Knowledge
 	}
-	
+
 	sbomOutput, err := h.Analyzer.AnalyzeProject(projectPath, analysisDoc.Id.String(), knowledgeDB)
 	if err != nil {
 		return h.handleFailure(databases, dispatcherMessage, config, err, "SBOM analysis failed")
@@ -108,7 +108,7 @@ func (h *GenericSBOMHandler) performSBOMAnalysis(
 		"language":     h.Analyzer.GetLanguage(),
 	}
 
-	log.Printf("%s SBOM Analysis - Completed successfully. Dependencies: %d, Framework: %s", 
+	log.Printf("%s SBOM Analysis - Completed successfully. Dependencies: %d, Framework: %s",
 		h.Analyzer.GetLanguage(), h.Analyzer.GetDependencyCount(sbomOutput), sbomOutput.GetFramework())
 
 	return response, sbomOutput.GetStatus(), nil
@@ -135,7 +135,7 @@ func (h *GenericSBOMHandler) extractProjectPath(analysisDoc codeclarity.Analysis
 	}
 
 	projectPath := basePath + "/" + projectInterface.(string)
-	
+
 	// Validate project path exists
 	if _, err := os.Stat(projectPath); os.IsNotExist(err) {
 		return "", fmt.Errorf("project path does not exist: %s", projectPath)
@@ -200,7 +200,7 @@ func CreateSBOMPlugin(analyzer SBOMAnalyzer) error {
 	defer pluginBase.Close()
 
 	handler := &GenericSBOMHandler{Analyzer: analyzer}
-	
+
 	log.Printf("Starting %s SBOM plugin", analyzer.GetLanguage())
 	err = pluginBase.Listen(handler)
 	if err != nil {

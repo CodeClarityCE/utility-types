@@ -20,36 +20,36 @@ const (
 type ErrorCategory string
 
 const (
-	ErrorCategoryDatabase     ErrorCategory = "database"
-	ErrorCategoryNetwork      ErrorCategory = "network"
-	ErrorCategoryValidation   ErrorCategory = "validation"
-	ErrorCategoryProcessing   ErrorCategory = "processing"
+	ErrorCategoryDatabase      ErrorCategory = "database"
+	ErrorCategoryNetwork       ErrorCategory = "network"
+	ErrorCategoryValidation    ErrorCategory = "validation"
+	ErrorCategoryProcessing    ErrorCategory = "processing"
 	ErrorCategoryConfiguration ErrorCategory = "configuration"
-	ErrorCategoryExternal     ErrorCategory = "external"
-	ErrorCategoryUnknown      ErrorCategory = "unknown"
+	ErrorCategoryExternal      ErrorCategory = "external"
+	ErrorCategoryUnknown       ErrorCategory = "unknown"
 )
 
 // EcosystemError represents ecosystem-specific errors with rich context
 type EcosystemError struct {
 	// Core error information
-	Message   string        `json:"message"`
-	Cause     error         `json:"cause,omitempty"`
-	Timestamp time.Time     `json:"timestamp"`
-	
+	Message   string    `json:"message"`
+	Cause     error     `json:"cause,omitempty"`
+	Timestamp time.Time `json:"timestamp"`
+
 	// Context information
-	Ecosystem   string        `json:"ecosystem,omitempty"`
-	Plugin      string        `json:"plugin,omitempty"`
-	Stage       string        `json:"stage,omitempty"`
-	AnalysisID  string        `json:"analysisId,omitempty"`
-	
+	Ecosystem  string `json:"ecosystem,omitempty"`
+	Plugin     string `json:"plugin,omitempty"`
+	Stage      string `json:"stage,omitempty"`
+	AnalysisID string `json:"analysisId,omitempty"`
+
 	// Error classification
 	Severity    ErrorSeverity `json:"severity"`
 	Category    ErrorCategory `json:"category"`
 	Recoverable bool          `json:"recoverable"`
-	
+
 	// Additional context
-	StackTrace  string                 `json:"stackTrace,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	StackTrace string                 `json:"stackTrace,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // Error implements the error interface
@@ -81,9 +81,9 @@ func NewEcosystemError(message string, cause error) *EcosystemError {
 		Message:     message,
 		Cause:       cause,
 		Timestamp:   time.Now(),
-		Severity:    ErrorSeverityMedium, // default
+		Severity:    ErrorSeverityMedium,  // default
 		Category:    ErrorCategoryUnknown, // default
-		Recoverable: false,               // default
+		Recoverable: false,                // default
 		Metadata:    make(map[string]interface{}),
 	}
 }
@@ -298,16 +298,16 @@ func (strategy ErrorRecoveryStrategy) ShouldRetry(err *EcosystemError, attemptCo
 	if attemptCount >= strategy.MaxRetries {
 		return false
 	}
-	
+
 	if strategy.RecoverableOnly && !err.IsRecoverable() {
 		return false
 	}
-	
+
 	// Don't retry critical configuration errors
 	if err.Category == ErrorCategoryConfiguration && err.Severity == ErrorSeverityCritical {
 		return false
 	}
-	
+
 	return true
 }
 
@@ -316,12 +316,12 @@ func (strategy ErrorRecoveryStrategy) GetRetryDelay(attemptCount int) time.Durat
 	if attemptCount <= 0 {
 		return strategy.RetryDelay
 	}
-	
+
 	// Exponential backoff
 	multiplier := 1.0
 	for i := 0; i < attemptCount; i++ {
 		multiplier *= strategy.BackoffFactor
 	}
-	
+
 	return time.Duration(float64(strategy.RetryDelay) * multiplier)
 }
