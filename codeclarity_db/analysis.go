@@ -39,4 +39,5 @@ const (
 	FAILURE     AnalysisStatus = "failure"
 	COMPLETED   AnalysisStatus = "completed"
 	STARTED     AnalysisStatus = "started"
+	CANCELLED   AnalysisStatus = "cancelled"
 )
