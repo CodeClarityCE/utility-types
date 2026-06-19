@@ -1,6 +1,8 @@
 package codeclarity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
@@ -8,6 +10,7 @@ import (
 type Analysis struct {
 	bun.BaseModel  `bun:"table:analysis,alias:analysis"`
 	Id             uuid.UUID  `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
+	Created_on     time.Time  `bun:"created_on"`
 	AnalyzerId     uuid.UUID  `bun:"analyzerId"`
 	OrganizationId uuid.UUID  `bun:"organizationId"`
 	ProjectId      *uuid.UUID `bun:"projectId"` // Pointer allows null values
