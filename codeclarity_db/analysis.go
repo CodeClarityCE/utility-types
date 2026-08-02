@@ -20,6 +20,11 @@ type Analysis struct {
 	Status         AnalysisStatus
 	Commit         string `bun:"commit_hash"`
 	Branch         string
+	// Schedule_type mirrors the API column: "once" for a single run (default),
+	// or "daily"/"weekly" for a recurring template. Recurring templates sit in a
+	// pre-dispatch status indefinitely and are driven by the scheduler (which
+	// clones them into "once" executions), so the reaper must never re-drive them.
+	Schedule_type string `bun:"schedule_type"`
 	// Results       []*result.Result `bun:"rel:has-many,join:id=analysisId"`
 }
 
@@ -43,4 +48,11 @@ const (
 	COMPLETED   AnalysisStatus = "completed"
 	STARTED     AnalysisStatus = "started"
 	CANCELLED   AnalysisStatus = "cancelled"
+	// REQUESTED and TRIGGERED are the API's pre-dispatch statuses (see the API's
+	// AnalysisStatus enum). An analysis is created REQUESTED before the dispatcher
+	// consumes its api_request message and flips it to STARTED; if that message is
+	// lost (e.g. RabbitMQ wiped on restart), the analysis is stranded REQUESTED.
+	// The reaper treats these as non-terminal so such orphans are recovered.
+	REQUESTED AnalysisStatus = "requested"
+	TRIGGERED AnalysisStatus = "triggered"
 )
