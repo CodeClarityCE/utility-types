@@ -25,6 +25,10 @@ type Analysis struct {
 	// pre-dispatch status indefinitely and are driven by the scheduler (which
 	// clones them into "once" executions), so the reaper must never re-drive them.
 	Schedule_type string `bun:"schedule_type"`
+	// FailureReason records why the analysis was marked FAILURE (e.g. the
+	// download error), truncated by the writer to fit the API's varchar(500)
+	// column; NULL for analyses that never failed.
+	FailureReason string `bun:"failure_reason,nullzero"`
 	// Results       []*result.Result `bun:"rel:has-many,join:id=analysisId"`
 }
 
