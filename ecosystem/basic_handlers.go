@@ -32,9 +32,9 @@ func (h *BasicEcosystemHandler) GetEcosystemInfo() EcosystemInfo {
 
 // ProcessLicenses processes license analysis for this ecosystem
 // This is a basic implementation that should be overridden by specific handlers
-func (h *BasicEcosystemHandler) ProcessLicenses(knowledgeDB *bun.DB, sbom interface{}, licensePolicy interface{}, start time.Time) interface{} {
+func (h *BasicEcosystemHandler) ProcessLicenses(knowledgeDB *bun.DB, sbom any, licensePolicy any, start time.Time) any {
 	// Basic implementation - should be overridden by specific ecosystem handlers
-	return map[string]interface{}{
+	return map[string]any{
 		"status":  "not_implemented",
 		"message": "License processing not implemented for " + h.languageID,
 	}
@@ -42,9 +42,9 @@ func (h *BasicEcosystemHandler) ProcessLicenses(knowledgeDB *bun.DB, sbom interf
 
 // ProcessVulnerabilities processes vulnerability analysis for this ecosystem
 // This is a basic implementation that should be overridden by specific handlers
-func (h *BasicEcosystemHandler) ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom interface{}, start time.Time) interface{} {
+func (h *BasicEcosystemHandler) ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom any, start time.Time) any {
 	// Basic implementation - should be overridden by specific ecosystem handlers
-	return map[string]interface{}{
+	return map[string]any{
 		"status":  "not_implemented",
 		"message": "Vulnerability processing not implemented for " + h.languageID,
 	}

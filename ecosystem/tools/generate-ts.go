@@ -54,8 +54,7 @@ func (c *GoToTypeScriptConverter) ConvertStruct(structType reflect.Type, name st
 		Fields:      []TypeScriptField{},
 	}
 
-	for i := 0; i < structType.NumField(); i++ {
-		field := structType.Field(i)
+	for field := range structType.Fields() {
 
 		// Skip unexported fields
 		if !field.IsExported() {
@@ -69,7 +68,7 @@ func (c *GoToTypeScriptConverter) ConvertStruct(structType reflect.Type, name st
 		}
 
 		// Check if field is optional (pointer type)
-		if field.Type.Kind() == reflect.Ptr {
+		if field.Type.Kind() == reflect.Pointer {
 			tsField.Optional = true
 			tsField.Type = c.convertGoTypeToTypescript(field.Type.Elem())
 		}
@@ -124,13 +123,13 @@ func (c *GoToTypeScriptConverter) convertGoTypeToTypescript(goType reflect.Type)
 			return fmt.Sprintf("Record<%s, %s>", keyType, valueType)
 		}
 		return fmt.Sprintf("{ [key: %s]: %s }", keyType, valueType)
-	case reflect.Ptr:
+	case reflect.Pointer:
 		return c.convertGoTypeToTypescript(goType.Elem())
 	case reflect.Interface:
 		return "any"
 	case reflect.Struct:
 		// Handle special cases
-		if goType == reflect.TypeOf(time.Time{}) {
+		if goType == reflect.TypeFor[time.Time]() {
 			return "string" // ISO date string
 		}
 
@@ -223,10 +222,10 @@ func main() {
 	converter := NewConverter()
 
 	// Convert ecosystem types
-	ecosystemInfoType := reflect.TypeOf(ecosystem.EcosystemInfo{})
+	ecosystemInfoType := reflect.TypeFor[ecosystem.EcosystemInfo]()
 	converter.types["EcosystemInfo"] = converter.ConvertStruct(ecosystemInfoType, "EcosystemInfo")
 
-	detectedLanguageType := reflect.TypeOf(ecosystem.DetectedLanguage{})
+	detectedLanguageType := reflect.TypeFor[ecosystem.DetectedLanguage]()
 	converter.types["DetectedLanguage"] = converter.ConvertStruct(detectedLanguageType, "DetectedLanguage")
 
 	// Add PluginEcosystemMap type
@@ -269,7 +268,7 @@ func main() {
 	fmt.Printf("Generated TypeScript definitions: %s\n", outputFile)
 
 	// Also generate a JSON schema for runtime validation
-	jsonSchema := map[string]interface{}{
+	jsonSchema := map[string]any{
 		"$schema": "http://json-schema.org/draft-07/schema#",
 		"title":   "Ecosystem Types",
 		"types":   converter.types,
