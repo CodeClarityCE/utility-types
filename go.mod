@@ -1,6 +1,6 @@
 module github.com/CodeClarityCE/utility-types
 
-go 1.26.4
+go 1.27.1
 
 require (
 	github.com/google/uuid v1.6.0
@@ -9,7 +9,9 @@ require (
 )
 
 require (
+	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
