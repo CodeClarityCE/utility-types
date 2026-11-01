@@ -88,11 +88,11 @@ type EcosystemHandler interface {
 
 	// ProcessLicenses processes license analysis for this ecosystem
 	// Using interface{} for now to avoid dependency issues, will be properly typed later
-	ProcessLicenses(knowledgeDB *bun.DB, sbom interface{}, licensePolicy interface{}, start time.Time) interface{}
+	ProcessLicenses(knowledgeDB *bun.DB, sbom any, licensePolicy any, start time.Time) any
 
 	// ProcessVulnerabilities processes vulnerability analysis for this ecosystem
 	// Using interface{} for now to avoid dependency issues, will be properly typed later
-	ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom interface{}, start time.Time) interface{}
+	ProcessVulnerabilities(projectURL string, knowledgeDB *bun.DB, sbom any, start time.Time) any
 
 	// SupportsLanguageID checks if this handler supports the given language ID
 	SupportsLanguageID(languageID string) bool

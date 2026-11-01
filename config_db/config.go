@@ -13,4 +13,5 @@ type Config struct {
 	NvdLast       time.Time `bun:"nvd_last,type:timestamptz"`
 	NpmLast       string    `bun:"npm_last"`
 	GcveLast      time.Time `bun:"gcve_last,type:timestamptz"`
+	OsvLast       time.Time `bun:"osv_last,type:timestamptz"`
 }
