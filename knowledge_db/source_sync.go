@@ -34,4 +34,7 @@ type SourceSync struct {
 	LastOutcome       *string    `bun:"last_outcome" json:"last_outcome"`
 	LastError         *string    `bun:"last_error" json:"last_error"`
 	RowCount          int64      `bun:"row_count,notnull" json:"row_count"`
+	// BulkCompletedAt is set while a bulk import is done but its enrichment is
+	// not. It holds the time the imported data is current to.
+	BulkCompletedAt *time.Time `bun:"bulk_completed_at,type:timestamptz" json:"bulk_completed_at"`
 }
