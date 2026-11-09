@@ -16,8 +16,8 @@ type NVDItem struct {
 	Id                uuid.UUID       `bun:",pk,autoincrement,type:uuid,default:uuid_generate_v4()"`
 	NVDId             string          `bun:"nvd_id" json:"id"`
 	SourceIdentifier  string          `bun:"sourceIdentifier"`
-	Published         string          `bun:"published"`
-	LastModified      string          `bun:"lastModified"`
+	Published         string          `bun:"published,type:timestamptz,nullzero"`
+	LastModified      string          `bun:"lastModified,type:timestamptz,nullzero"`
 	VulnStatus        string          `bun:"vulnStatus"`
 	Descriptions      []Descriptions  `bun:"descriptions"`
 	Vlai_score        string          `bun:"vlai_score"`
@@ -28,6 +28,7 @@ type NVDItem struct {
 	AffectedFlattened []Sources       `bun:"affectedFlattened"`
 	Affected          []NVDAffected   `bun:"affected"`
 	References        []References    `bun:"references"`
+	Retirement
 }
 type Descriptions struct {
 	Lang  string `json:"lang"`

@@ -17,8 +17,9 @@ type FriendsOfPHPAdvisory struct {
 	Composer      string                    `bun:"composer" json:"composer,omitempty"`
 	Description   string                    `bun:"description" json:"description,omitempty"`
 	Branches      map[string]AdvisoryBranch `bun:"branches,type:jsonb" json:"branches"`
-	Published     string                    `bun:"published" json:"published"`
-	Modified      string                    `bun:"modified" json:"modified"`
+	Published     string                    `bun:"published,type:timestamptz,nullzero" json:"published"`
+	Modified      string                    `bun:"modified,type:timestamptz,nullzero" json:"modified"`
+	Retirement
 }
 
 // AdvisoryBranch represents version information for a specific branch

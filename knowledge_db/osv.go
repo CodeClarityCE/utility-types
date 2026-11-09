@@ -15,9 +15,9 @@ type OSVItem struct {
 	Schema_version   string         `json:"schema_version" bun:"schema_version"`
 	Vlai_score       string         `bun:"vlai_score"`
 	Vlai_confidence  float64        `bun:"vlai_confidence"`
-	Modified         string         `json:"modified" bun:"modified"`
-	Published        string         `json:"published" bun:"published"`
-	Withdrawn        string         `json:"withdrawn" bun:"withdrawn"`
+	Modified         string         `json:"modified" bun:"modified,type:timestamptz,nullzero"`
+	Published        string         `json:"published" bun:"published,type:timestamptz,nullzero"`
+	Withdrawn        string         `json:"withdrawn" bun:"withdrawn,type:timestamptz,nullzero"`
 	Aliases          []string       `json:"aliases" bun:"aliases"`
 	Related          []string       `json:"related" bun:"related"`
 	Summary          string         `json:"summary" bun:"summary"`
@@ -29,6 +29,9 @@ type OSVItem struct {
 	DatabaseSpecific map[string]any `json:"database_specific" bun:"database_specific"`
 	Cwes             []string       `json:"cwes" bun:"cwes"`
 	Cve              string         `json:"cve" bun:"cve"`
+	Kind             string         `json:"-" bun:"kind,nullzero,default:'vulnerability'"`
+	CveAliases       []string       `json:"-" bun:"cve_aliases,scanonly"`
+	Retirement
 }
 
 type Severity struct {
