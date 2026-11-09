@@ -36,7 +36,9 @@ type Descriptions struct {
 }
 
 type Configuration struct {
-	Nodes []Node `json:"nodes"`
+	Operator string `json:"operator,omitempty"`
+	Negate   bool   `json:"negate,omitempty"`
+	Nodes    []Node `json:"nodes"`
 }
 type Node struct {
 	Operator string    `json:"operator"`
@@ -183,12 +185,12 @@ func GetVulns(nvd NVD) []NVDItem {
 		// cve.Key = cve.Id
 		cve.Affected = createAffected(cve)
 
-		// We flatten the affected array so we can easily query it
+		// Flatten every affected entry so products can be queried.
 		var flattened []Sources
-		if len(cve.Affected) != 0 {
-			flattened = append(flattened, cve.Affected[0].Sources...)
-			flattened = append(flattened, cve.Affected[0].RunningOn...)
-			flattened = append(flattened, cve.Affected[0].RunningOnApplicationsOnly...)
+		for _, entry := range cve.Affected {
+			flattened = append(flattened, entry.Sources...)
+			flattened = append(flattened, entry.RunningOn...)
+			flattened = append(flattened, entry.RunningOnApplicationsOnly...)
 		}
 		cve.AffectedFlattened = flattened
 
@@ -198,8 +200,6 @@ func GetVulns(nvd NVD) []NVDItem {
 			}
 		}
 
-		// We dont need the configurations anymore
-		cve.Configurations = nil
 		vulns = append(vulns, cve)
 	}
 
@@ -209,9 +209,8 @@ func GetVulns(nvd NVD) []NVDItem {
 func createAffected(cve NVDItem) []NVDAffected {
 	var affected []NVDAffected
 
-	// See why configurations is now an array
-	if len(cve.Configurations) > 0 {
-		for _, config := range cve.Configurations[0].Nodes {
+	for _, configuration := range cve.Configurations {
+		for _, config := range configuration.Nodes {
 			// Three entries to fill: the actual source that is vulnerable, secondly what its running on and lastly running on but only applications
 			// Example:
 			//   source: bootstrap
@@ -283,6 +282,9 @@ func parseConfig(config Sources) CriteriaDict {
 	// parsed_cpe = cpe_parser(config["cpe23Uri"])
 	// config["cpe23Wfn"] = parsed_cpe.as_wfn()
 	criteria_string := strings.Split(config.Criteria, ":")
+	if len(criteria_string) < 13 {
+		return CriteriaDict{}
+	}
 	criteria := CriteriaDict{
 		Part:      criteria_string[2],
 		Vendor:    criteria_string[3],
