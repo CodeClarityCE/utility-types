@@ -1,6 +1,8 @@
 package knowledge
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
@@ -11,4 +13,5 @@ type EPSS struct {
 	CVE           string    `bun:"cve" json:"cve"`
 	Score         float32   `bun:"score" json:"score"`
 	Percentile    float32   `bun:"percentile" json:"percentile"`
+	ScoreDate     time.Time `bun:"score_date,type:date,nullzero" json:"-"`
 }
