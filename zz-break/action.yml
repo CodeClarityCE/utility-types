@@ -1,0 +1,7 @@
+name: Deliberate zizmor breakage
+description: Composite action with a template injection
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: echo "PR title is ${{ github.event.pull_request.title }}"
