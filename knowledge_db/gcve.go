@@ -14,8 +14,8 @@ type GCVEItem struct {
 	CVEId             string            `bun:"cve_id" json:"cve_id"`
 	DataVersion       string            `bun:"data_version" json:"dataVersion"`
 	State             string            `bun:"state" json:"state"`
-	DatePublished     string            `bun:"date_published" json:"datePublished"`
-	DateUpdated       string            `bun:"date_updated" json:"dateUpdated"`
+	DatePublished     string            `bun:"date_published,type:timestamptz,nullzero" json:"datePublished"`
+	DateUpdated       string            `bun:"date_updated,type:timestamptz,nullzero" json:"dateUpdated"`
 	AssignerOrgId     string            `bun:"assigner_org_id" json:"assignerOrgId"`
 	Descriptions      []GCVEDescription `bun:"descriptions,type:jsonb" json:"descriptions"`
 	Affected          []GCVEAffected    `bun:"affected,type:jsonb" json:"affected"`
@@ -27,6 +27,7 @@ type GCVEItem struct {
 	Cwes              []string          `bun:"cwes,type:text[]" json:"cwes"`
 	VlaiScore         string            `bun:"vlai_score"`
 	VlaiConfidence    float64           `bun:"vlai_confidence"`
+	Retirement
 }
 
 type GCVEDescription struct {

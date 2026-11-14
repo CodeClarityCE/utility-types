@@ -59,4 +59,6 @@ const (
 	// The reaper treats these as non-terminal so such orphans are recovered.
 	REQUESTED AnalysisStatus = "requested"
 	TRIGGERED AnalysisStatus = "triggered"
+	// SKIPPED marks a step that does not apply to the project's detected languages.
+	SKIPPED AnalysisStatus = "skipped"
 )
