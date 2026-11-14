@@ -3,7 +3,7 @@ module github.com/CodeClarityCE/utility-types
 go 1.27.3
 
 require (
-	github.com/google/uuid v1.6.0
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/uptrace/bun v1.2.18
 )
