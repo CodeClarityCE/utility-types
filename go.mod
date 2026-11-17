@@ -5,7 +5,7 @@ go 1.27.4
 require (
 	github.com/google/uuid v1.6.0
 	github.com/schollz/progressbar/v3 v3.19.1
-	github.com/uptrace/bun v1.2.18
+	github.com/uptrace/bun v1.3.0
 )
 
 require (
