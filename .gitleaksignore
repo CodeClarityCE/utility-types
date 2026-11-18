@@ -1,0 +1,3 @@
+# A made-up GitLab token in the redaction test, since replaced by glpat-test-token.
+ecbfe596052024c958d5de1ec18e98be4eb29dc7:codeclarity_db/failure_reason_test.go:gitlab-pat:17
+ecbfe596052024c958d5de1ec18e98be4eb29dc7:codeclarity_db/failure_reason_test.go:gitlab-pat-any-entropy:17
