@@ -14,7 +14,7 @@ func TestSanitizeFailureReason(t *testing.T) {
 		{"leaves words with slashes", "use npm/yarn and/or composer", "use npm/yarn and/or composer"},
 		{"removes URL credentials", "clone https://user:s3cret@github.com/a/b failed", "clone https://github.com/a/b failed"},
 		{"hides a GitHub token", "auth failed for ghp_abcdefghijklmnopqrstuvwxyz0123", "auth failed for [secret]"},
-		{"hides a GitLab token", "bad glpat-abcdefghijklmnopqrst token", "bad [secret] token"},
+		{"hides a GitLab token", "bad glpat-test-token token", "bad [secret] token"},
 		{"hides a bearer token", "sent Bearer abc.def-123", "sent Bearer [secret]"},
 		{"hides key=value secrets", "failed password=hunter2 token: abc", "failed password=[secret] token: [secret]"},
 		{"trims whitespace", "  padded \n", "padded"},
