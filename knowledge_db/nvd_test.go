@@ -74,3 +74,18 @@ func TestGetVulnsSkipsAMalformedCriteria(t *testing.T) {
 		t.Errorf("products = %v, want only the well-formed one", got)
 	}
 }
+
+func TestNVDMetricsReadCVSS4(t *testing.T) {
+	var metrics Metrics
+	body := `{"cvssMetricV40":[{"source":"nvd@nist.gov","type":"Primary","cvssData":{"version":"4.0","baseScore":9.3,"baseSeverity":"CRITICAL","vectorString":"CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"}}]}`
+	if err := json.Unmarshal([]byte(body), &metrics); err != nil {
+		t.Fatal(err)
+	}
+	if len(metrics.CvssMetricV40) != 1 {
+		t.Fatalf("got %d CVSS 4.0 metrics, want 1", len(metrics.CvssMetricV40))
+	}
+	got := metrics.CvssMetricV40[0]
+	if got.Type != "Primary" || got.CvssData.BaseScore != 9.3 || got.CvssData.Version != "4.0" {
+		t.Errorf("metric = %+v", got)
+	}
+}
