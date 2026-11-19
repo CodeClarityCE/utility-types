@@ -131,10 +131,25 @@ type ImpactMetricV30 struct {
 	Type                string  `json:"type"`
 }
 
+// CVSS4 is the part of an NVD CVSS 4.0 metric the plugins read; the vector carries the rest.
+type CVSS4 struct {
+	BaseScore    float64 `json:"baseScore"`
+	BaseSeverity string  `json:"baseSeverity"`
+	VectorString string  `json:"vectorString"`
+	Version      string  `json:"version"`
+}
+
+type ImpactMetricV40 struct {
+	CvssData CVSS4  `json:"cvssData"`
+	Source   string `json:"source"`
+	Type     string `json:"type"`
+}
+
 type Metrics struct {
 	CvssMetricV2  []ImpactMetricV2  `json:"cvssMetricV2"`
 	CvssMetricV30 []ImpactMetricV30 `json:"cvssMetricV30"`
 	CvssMetricV31 []ImpactMetricV31 `json:"cvssMetricV31"`
+	CvssMetricV40 []ImpactMetricV40 `json:"cvssMetricV40,omitempty"`
 }
 type Weaknesses struct {
 	Source       string         `json:"source"`
