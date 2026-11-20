@@ -12,6 +12,7 @@ const (
 	SourceEPSS         = "epss"
 	SourceFriendsOfPHP = "friends_of_php"
 	SourceGCVE         = "gcve"
+	SourceKEV          = "kev"
 	SourceLicenses     = "licenses"
 	SourceNVD          = "nvd"
 	SourceOSV          = "osv"
