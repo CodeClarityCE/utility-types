@@ -1,6 +1,8 @@
 package knowledge
 
 import (
+	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
@@ -64,6 +66,14 @@ type GCVEMetricEntry struct {
 	CvssV30 *GCVECvssScore `json:"cvssV3_0,omitempty"`
 	CvssV40 *GCVECvssScore `json:"cvssV4_0,omitempty"`
 	CvssV2  *GCVECvssScore `json:"cvssV2_0,omitempty"`
+	// Other holds a metric outside CVSS, such as CISA's SSVC decision points.
+	Other *GCVEOtherMetric `json:"other,omitempty"`
+}
+
+// GCVEOtherMetric is a metric of a named type whose content the CVE Record format leaves free.
+type GCVEOtherMetric struct {
+	Type    string          `json:"type"`
+	Content json.RawMessage `json:"content"`
 }
 
 type GCVECvssScore struct {

@@ -17,7 +17,7 @@ const (
 )
 
 // AllSources lists every knowledge source in a fixed order.
-var AllSources = []string{SourceCWE, SourceEPSS, SourceFriendsOfPHP, SourceGCVE, SourceLicenses, SourceNVD, SourceOSV}
+var AllSources = []string{SourceCWE, SourceEPSS, SourceFriendsOfPHP, SourceGCVE, SourceKEV, SourceLicenses, SourceNVD, SourceOSV}
 
 // DefaultStaleAfterHours matches the API and the Grafana stale alerts.
 var DefaultStaleAfterHours = map[string]float64{
@@ -25,6 +25,7 @@ var DefaultStaleAfterHours = map[string]float64{
 	SourceEPSS:         24,
 	SourceFriendsOfPHP: 168,
 	SourceGCVE:         48,
+	SourceKEV:          48,
 	SourceLicenses:     168,
 	SourceNVD:          48,
 	SourceOSV:          24,
