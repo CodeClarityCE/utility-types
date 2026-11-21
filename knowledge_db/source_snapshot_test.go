@@ -35,8 +35,8 @@ func TestTakeSnapshotRecordsEverySourceWithWatermarkAndRowCount(t *testing.T) {
 		t.Fatalf("taken_at = %v, want %v", snapshot.TakenAt, now)
 	}
 	got := bySource(snapshot)
-	if len(got) != 7 {
-		t.Fatalf("snapshot has %d sources, want all 7: %v", len(got), snapshot.Sources)
+	if len(got) != 8 {
+		t.Fatalf("snapshot has %d sources, want all 8: %v", len(got), snapshot.Sources)
 	}
 	osv := got[SourceOSV]
 	if osv.Status != SourceHealthy || !osv.Comparable || osv.RowCount != 238664 || !osv.Watermark.Equal(*at("2026-11-09T06:00:00Z")) {
@@ -44,6 +44,9 @@ func TestTakeSnapshotRecordsEverySourceWithWatermarkAndRowCount(t *testing.T) {
 	}
 	if osv.StaleAfterHours != 24 {
 		t.Fatalf("osv stale_after_hours = %v, want 24", osv.StaleAfterHours)
+	}
+	if kev := got[SourceKEV]; kev.StaleAfterHours != 48 {
+		t.Fatalf("kev stale_after_hours = %v, want 48", kev.StaleAfterHours)
 	}
 	nvd := got[SourceNVD]
 	if nvd.Status != SourceStale || nvd.Comparable || nvd.Watermark != nil || nvd.RowCount != 0 {
@@ -127,8 +130,8 @@ func TestUnreadableSnapshotMarksEverySourceUnknown(t *testing.T) {
 
 	snapshot := UnknownSnapshot(now, nil)
 
-	if len(snapshot.Sources) != 7 {
-		t.Fatalf("snapshot has %d sources, want 7", len(snapshot.Sources))
+	if len(snapshot.Sources) != 8 {
+		t.Fatalf("snapshot has %d sources, want 8", len(snapshot.Sources))
 	}
 	for _, source := range snapshot.Sources {
 		if source.Status != SourceUnknown || source.Comparable {
