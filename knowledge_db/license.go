@@ -80,7 +80,7 @@ func GetDetails(licenses []License) []License {
 	maxGoroutines := 100
 	guard := make(chan struct{}, maxGoroutines)
 	// Configure progression bar
-	var length int64 = int64(len(licenses))
+	length := int64(len(licenses))
 	bar := progressbar.Default(length)
 
 	for key := range licenses {
@@ -88,6 +88,8 @@ func GetDetails(licenses []License) []License {
 		guard <- struct{}{}
 		go func(wg *sync.WaitGroup, key int) {
 			defer wg.Done()
+			// Free the slot on failure too, or 100 failed fetches block the loop forever.
+			defer func() { <-guard }()
 			defer bar.Add(1)
 			url := licenses[key].DetailsURL
 			details, err := getBasicDetails(url)
@@ -95,15 +97,21 @@ func GetDetails(licenses []License) []License {
 				return
 			}
 			licenses[key].Details = details
-			<-guard
 		}(&wg, key)
 	}
 	wg.Wait()
 	return licenses
 }
 
+// licenseClient fetches license details; the timeout keeps one stuck server from hanging the mirror.
+var licenseClient = &http.Client{Timeout: 30 * time.Second}
+
 func getBasicDetails(url string) (Details, error) {
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return Details{}, err
+	}
+	resp, err := licenseClient.Do(req)
 	if err != nil {
 		log.Println("No response from request")
 		return Details{}, err

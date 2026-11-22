@@ -175,23 +175,23 @@ func (c *GoToTypeScriptConverter) writeTypeDefinition(sb *strings.Builder, tsTyp
 
 	if tsType.IsEnum {
 		// Write enum
-		sb.WriteString(fmt.Sprintf("export enum %s {\n", tsType.Name))
+		fmt.Fprintf(sb, "export enum %s {\n", tsType.Name)
 		for _, value := range tsType.Values {
-			sb.WriteString(fmt.Sprintf("  %s,\n", value))
+			fmt.Fprintf(sb, "  %s,\n", value)
 		}
 		sb.WriteString("}")
 	} else if tsType.IsInterface {
 		// Write interface
-		sb.WriteString(fmt.Sprintf("export interface %s", tsType.Name))
+		fmt.Fprintf(sb, "export interface %s", tsType.Name)
 
 		// Write extends clause
 		if tsType.Extends != "" {
-			sb.WriteString(fmt.Sprintf(" extends %s", tsType.Extends))
+			fmt.Fprintf(sb, " extends %s", tsType.Extends)
 		}
 
 		// Write implements clause
 		if len(tsType.Implements) > 0 {
-			sb.WriteString(fmt.Sprintf(" implements %s", strings.Join(tsType.Implements, ", ")))
+			fmt.Fprintf(sb, " implements %s", strings.Join(tsType.Implements, ", "))
 		}
 
 		sb.WriteString(" {\n")
@@ -199,7 +199,7 @@ func (c *GoToTypeScriptConverter) writeTypeDefinition(sb *strings.Builder, tsTyp
 		// Write fields
 		for _, field := range tsType.Fields {
 			if field.Comment != "" {
-				sb.WriteString(fmt.Sprintf("  /** %s */\n", field.Comment))
+				fmt.Fprintf(sb, "  /** %s */\n", field.Comment)
 			}
 
 			optional := ""
@@ -207,13 +207,13 @@ func (c *GoToTypeScriptConverter) writeTypeDefinition(sb *strings.Builder, tsTyp
 				optional = "?"
 			}
 
-			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", field.Name, optional, field.Type))
+			fmt.Fprintf(sb, "  %s%s: %s;\n", field.Name, optional, field.Type)
 		}
 
 		sb.WriteString("}")
 	} else {
 		// Write type alias
-		sb.WriteString(fmt.Sprintf("export type %s = %s;", tsType.Name, tsType.Type))
+		fmt.Fprintf(sb, "export type %s = %s;", tsType.Name, tsType.Type)
 	}
 }
 
@@ -259,7 +259,7 @@ func main() {
 	outputFile := filepath.Join(outputDir, "ecosystem.gen.ts")
 
 	// Write to file
-	err := os.WriteFile(outputFile, []byte(typescript), 0644)
+	err := os.WriteFile(outputFile, []byte(typescript), 0o644) //nolint:gosec // generated source file, readable like any other source
 	if err != nil {
 		fmt.Printf("Error writing TypeScript file: %v\n", err)
 		os.Exit(1)
@@ -281,7 +281,7 @@ func main() {
 	}
 
 	schemaFile := filepath.Join(outputDir, "ecosystem.schema.json")
-	err = os.WriteFile(schemaFile, jsonBytes, 0644)
+	err = os.WriteFile(schemaFile, jsonBytes, 0o644) //nolint:gosec // generated source file, readable like any other source
 	if err != nil {
 		fmt.Printf("Error writing JSON schema file: %v\n", err)
 		os.Exit(1)
