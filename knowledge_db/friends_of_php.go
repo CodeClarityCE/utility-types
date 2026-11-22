@@ -43,12 +43,11 @@ func (f *FriendsOfPHPAdvisory) GetAffectedPackages() []FriendsOfPHPAffected {
 	if packageName == "" {
 		// Extract from advisory ID if composer field is missing
 		// Advisory IDs are typically in format "vendor/package/YYYY-MM-DD"
-		parts := []rune(f.AdvisoryId)
 		var vendor, pkg string
 		slashCount := 0
 		var current []rune
 
-		for _, char := range parts {
+		for _, char := range f.AdvisoryId {
 			if char == '/' {
 				slashCount++
 				if slashCount == 1 {

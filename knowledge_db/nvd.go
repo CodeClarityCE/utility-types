@@ -232,7 +232,8 @@ func createAffected(cve NVDItem) []NVDAffected {
 			//   running-on: django, windows
 			//   running-on-applicaitons-only: django
 
-			if config.Operator == "AND" {
+			switch config.Operator {
+			case "AND":
 				if len(config.Children) < 2 {
 					if len(config.CpeMatch) > 0 {
 						sources := config.CpeMatch
@@ -271,7 +272,7 @@ func createAffected(cve NVDItem) []NVDAffected {
 						})
 					}
 				}
-			} else if config.Operator == "OR" {
+			case "OR":
 				sources := config.CpeMatch
 				for source := range sources {
 					sources[source].CriteriaDict = parseConfig(sources[source])
